@@ -1,5 +1,4 @@
 import { ADD_FLASH_MESSAGE } from '../actions/types';
-import shortid from 'shortid';
 
 export default (state = [], action = {}) => {
   switch(action.type) {
@@ -9,7 +8,8 @@ export default (state = [], action = {}) => {
         {
           type: action.message.type,
           text: action.message.text,
-          id: shortid.generate()
+          // id is generated in the action creator to keep this function pure
+          id: action.message.id
         }
       ];
     default:
