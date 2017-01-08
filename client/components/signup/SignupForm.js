@@ -17,12 +17,14 @@ class SignupForm extends React.Component {
       passwordConfirmation: '',
       timezone: '',
       errors: {},
-      isLoading: false
+      isLoading: false,
+      invalid: false
     };
 
     // Binding the right context to the onChange and onSubmit methods
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
+    this.checkUserExists = this.checkUserExists.bind(this);
   }
 
   onChange(e) {
@@ -37,6 +39,25 @@ class SignupForm extends React.Component {
     }
 
     return isValid;
+  }
+
+  checkUserExists(e) {
+    const field = e.target.name;
+    const val = e.target.value;
+    if (val !== '') {
+      this.props.isUserExists(val).then(res => {
+        let errors = this.state.errors;
+        let invalid;
+        if(res.data.user) {
+          errors[field] = 'There is user with such ' + field;
+          invalid = true;
+        } else {
+          errors[field] = '';
+          invalid = false;
+        }
+        this.setState({ errors, invalid });
+      });
+    }
   }
 
   onSubmit(e) {
@@ -71,18 +92,20 @@ class SignupForm extends React.Component {
 				<TextFieldGroup
 					error={errors.username}
 					label="Username"
+          checkUserExists={this.checkUserExists}
 					onChange={this.onChange}
 					value={this.state.username}
 					field="username"
-				/>
+    />
 
 				<TextFieldGroup
 					error={errors.email}
 					label="Email"
+          checkUserExists={this.checkUserExists}
 					onChange={this.onChange}
 					value={this.state.email}
 					field="email"
-				/>
+    />
 
 				<TextFieldGroup
 					error={errors.password}
@@ -90,7 +113,8 @@ class SignupForm extends React.Component {
 					onChange={this.onChange}
 					value={this.state.password}
 					field="password"
-				/>
+          type="password"
+    />
 
 				<TextFieldGroup
 					error={errors.passwordConfirmation}
@@ -98,7 +122,8 @@ class SignupForm extends React.Component {
 					onChange={this.onChange}
 					value={this.state.passwordConfirmation}
 					field="passwordConfirmation"
-				/>
+          type="password"
+    />
 
         <div className={classnames("form-group",
           { 'has-error': errors.timezone })}>
@@ -120,7 +145,7 @@ class SignupForm extends React.Component {
         <div className="form-group">
           <button
             className="btn btn-primary btn-lg"
-            disabled={this.state.isLoading}
+            disabled={this.state.isLoading || this.state.invalid}
           >
             Sign up
           </button>
@@ -132,7 +157,8 @@ class SignupForm extends React.Component {
 
 SignupForm.propTypes = {
   userSignupRequest: React.PropTypes.func.isRequired,
-  addFlashMessage: React.PropTypes.func.isRequired
+  addFlashMessage: React.PropTypes.func.isRequired,
+  isUserExists: React.PropTypes.func.isRequired
 };
 
 SignupForm.contextTypes = {
